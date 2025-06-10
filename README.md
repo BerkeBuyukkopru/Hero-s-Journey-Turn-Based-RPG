@@ -1,6 +1,5 @@
 # Hero's Journey
-
-- **Hero's Journey** is a simple turn-based strategy game developed using **Angular 7** and **ASP.NET MVC**.
+**Hero's Journey** is a simple turn-based strategy game developed using **Angular 7** and **ASP.NET MVC**.
 
 ## Features
 - Start the game by entering a character name.
