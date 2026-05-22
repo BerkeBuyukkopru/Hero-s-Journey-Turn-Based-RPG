@@ -200,9 +200,11 @@ Changed database context to 'GameDatabase'.
    Game/Game.sln
    ```
 
-2. Set `GameWebAPI` as the startup project.
+2. Restore NuGet packages if Visual Studio does not restore them automatically.
 
-3. Make sure the connection string in `Game/GameWebAPI/Web.config` points to your SQL Server instance:
+3. Set `GameWebAPI` as the startup project.
+
+4. Make sure the connection string in `Game/GameWebAPI/Web.config` points to your SQL Server instance:
 
    ```xml
    <add name="GameDatabase"
@@ -210,7 +212,7 @@ Changed database context to 'GameDatabase'.
         providerName="System.Data.SqlClient" />
    ```
 
-4. Run the backend project.
+5. Run the backend project.
 
 The frontend expects the backend API to be available at:
 
