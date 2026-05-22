@@ -10,7 +10,7 @@ namespace DAL
 {
     public class HeroTemplateRepository
     {
-        string connectionString = "Data Source=DESKTOP-518NUBI\\SQLEXPRESS;Initial Catalog=GameDatabase;Integrated Security=True";
+        string connectionString = Database.ConnectionString;
 
         public HeroTemplate GetHeroTemplate(int HTId)
         {

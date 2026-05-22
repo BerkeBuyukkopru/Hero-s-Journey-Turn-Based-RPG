@@ -1,7 +1,0 @@
-C:\Users\Berke Büyükköprü\Desktop\Game Project\Game\Ortak Katman\bin\Release\Ortak Katman.dll.config
-C:\Users\Berke Büyükköprü\Desktop\Game Project\Game\Ortak Katman\bin\Release\Ortak Katman.dll
-C:\Users\Berke Büyükköprü\Desktop\Game Project\Game\Ortak Katman\bin\Release\Ortak Katman.pdb
-C:\Users\Berke Büyükköprü\Desktop\Game Project\Game\Ortak Katman\obj\Release\Ortak Katman.csproj.AssemblyReference.cache
-C:\Users\Berke Büyükköprü\Desktop\Game Project\Game\Ortak Katman\obj\Release\Ortak Katman.csproj.CoreCompileInputs.cache
-C:\Users\Berke Büyükköprü\Desktop\Game Project\Game\Ortak Katman\obj\Release\Ortak Katman.dll
-C:\Users\Berke Büyükköprü\Desktop\Game Project\Game\Ortak Katman\obj\Release\Ortak Katman.pdb

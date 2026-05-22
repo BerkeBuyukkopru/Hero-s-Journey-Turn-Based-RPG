@@ -2,13 +2,14 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class EnemyService {
   
-  private path ='http://localhost:5000/api/enemy/'; // Backend API URL'si
+  private path = `${environment.apiBaseUrl}/enemy/`; // Backend API URL'si
 
   constructor(private httpClient:HttpClient) { }
 

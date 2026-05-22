@@ -22,6 +22,11 @@ namespace GameWebAPI.Controllers
         [HttpGet]
         public IHttpActionResult GetHero(int heroId)
         {
+            if (heroId <= 0)
+            {
+                return BadRequest("Geçersiz kahraman id.");
+            }
+
             try
             {
                 // HeroService için gerekli parametreleri sağlıyoruz
@@ -42,11 +47,32 @@ namespace GameWebAPI.Controllers
         [HttpPost]
         public IHttpActionResult InitializeHeroFromTemplate([FromBody] HeroBody heroBody)
         {
+            if (heroBody == null || heroBody.TemplateId <= 0)
+            {
+                return BadRequest("Geçersiz kahraman şablonu.");
+            }
+
+            if (string.IsNullOrWhiteSpace(heroBody.HeroName))
+            {
+                return BadRequest("Kahraman adı boş olamaz.");
+            }
+
+            heroBody.HeroName = heroBody.HeroName.Trim();
+            if (heroBody.HeroName.Length > 20)
+            {
+                return BadRequest("Kahraman adı en fazla 20 karakter olabilir.");
+            }
+
             try
             {
                 // HeroService için gerekli parametreleri sağlıyoruz
                 _heroService = new HeroService();
                 var hero = _heroService.InitializeHeroFromTemplate(heroBody.TemplateId, heroBody.HeroName);
+                if (hero == null)
+                {
+                    return NotFound();
+                }
+
                 return Ok(new { success = true, message = "Kahraman Başarıyla Eklendi.", hero = hero });
             }
             catch (Exception e)
@@ -59,10 +85,20 @@ namespace GameWebAPI.Controllers
         [HttpPut]
         public IHttpActionResult UpdateHeroStats([FromBody] HeroBody heroBody)
         {
+            if (heroBody == null || heroBody.HeroId <= 0 || heroBody.HeroLevel <= 0)
+            {
+                return BadRequest("Geçersiz kahraman veya seviye bilgisi.");
+            }
+
             try
             {
                 _heroService = new HeroService();
                 var hero = _heroService.UpdateHeroStats(heroBody.HeroId, heroBody.HeroLevel);
+                if (hero == null)
+                {
+                    return NotFound();
+                }
+
                 return Ok(new { success = true, message = "Kahraman Başarıyla Güncellendi." ,hero=hero });
             }
             catch (Exception e)

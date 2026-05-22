@@ -1,23 +1,44 @@
-html, body {
-  width: 100%;
-  height: 100%;
-}
 .login-container {
-  width: 100%; /* Görüntüleme alanının tamamını kaplar */
-  height: 100vh; /* Ekranın tamamını kaplar */
-  margin: 0;
-  padding: 2%;
-  box-sizing: border-box; /* Padding ve border'ı genişliğe dahil eder */
+  align-items: center;
   background-image: url('src\assets\images\background.jpg');
-  background-size: cover; /* Resmi kapsayıcıya uydurur */
-  background-position: center; /* Resmi ortalar */
-  background-repeat: no-repeat; /* Resmi tekrar etmez */
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2%;
+  width: 100%;
 }
 
 .form-group {
+  background: rgba(15, 37, 55, 0.6);
   border: 1px solid #ccc;
+  border-radius: 8px;
   margin-bottom: 1.5%;
-  background: rgba(15, 37, 55, 0.6); /* Transparan arka plan rengi */
+  max-width: 520px;
   padding: 2%;
-  border-radius: 8px; /* Kenarları yuvarlatır */
+  width: min(90vw, 520px);
+}
+
+.modal-backdrop-custom {
+  align-items: center;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: 24px;
+  position: fixed;
+  z-index: 10;
+}
+
+.message-modal {
+  background: #102437;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 8px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+  max-width: 420px;
+  padding: 24px;
+  width: 100%;
 }

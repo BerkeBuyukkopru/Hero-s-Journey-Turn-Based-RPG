@@ -6,6 +6,11 @@ import { levelmodel } from '../models/levelmodel';
 import { enemymodel } from '../models/enemymodel';
 import { heromodel } from '../models/heromodel';
 
+interface BattleLogEntry {
+  source: 'hero' | 'enemy' | 'system';
+  text: string;
+}
+
 @Component({
   selector: 'app-game',
   templateUrl: './game.component.html',
@@ -13,17 +18,19 @@ import { heromodel } from '../models/heromodel';
 })
 export class GameComponent implements OnInit {
   heroId: number;
-  heroName: string;
-  heroActionLog: string = '';
-  heroActionLog1:string;
-  enemyActionLog: string = ''; 
 
   hero: heromodel;
   enemy: enemymodel;
   level: levelmodel;
 
-  defending: boolean = false;
+  battleLogs: BattleLogEntry[] = [];
+  turnPhase: 'loading' | 'player' | 'enemy' | 'modal' | 'finished' = 'loading';
+  statusMessage = 'Savaş hazırlanıyor...';
   isHealButtonDisabled = false;
+
+  modalTitle = '';
+  modalMessage = '';
+  modalAction: 'none' | 'nextLevel' | 'login' = 'none';
 
   constructor(
     private route: ActivatedRoute,
@@ -33,162 +40,241 @@ export class GameComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-  
     this.level = new levelmodel();
-    this.level.LevelNumber = 1// Oyuna başlarken ilk level
-    // Query params'ten heroId ve heroName'i al
+    this.level.LevelNumber = 1;
+
     this.route.queryParams.subscribe(params => {
-      this.heroId = params['heroId'];
-      this.heroName = params['heroName'];
+      this.heroId = Number(params['heroId']);
+
+      if (!Number.isInteger(this.heroId) || this.heroId <= 0) {
+        this.router.navigate(['/login']);
+        return;
+      }
+
       this.initializeHero();
       this.initializeEnemy();
     });
   }
 
-  resetHealButton(): void {
-    this.isHealButtonDisabled = false;
-  }
-
-  // Kahraman bilgilerini al ve ayarla
   initializeHero(): void {
-    
     this.heroService.GetHero(this.heroId).subscribe(
       (data: any) => {
-        
-        this.hero = data.hero;
-        this.hero.HeroName = this.heroName; // heroName'i modele ata
-        //this.hero.HeroHealth;
-        this.hero.MaxHealth = this.hero.HeroHealth;
+        if (!data || !data.success || !data.hero) {
+          this.showModal('Kahraman bulunamadı', 'Giriş sayfasına yönlendiriliyorsun...', 'login');
+          return;
+        }
 
+        this.hero = data.hero;
+        this.hero.MaxHealth = this.hero.HeroHealth;
         this.resetHealButton();
-      });
+        this.activatePlayerTurnIfReady();
+      },
+      (error: any) => this.showModal('Kahraman yüklenemedi', this.getErrorMessage(error), 'login')
+    );
   }
 
   initializeEnemy(): void {
     this.enemyService.GetRandomEnemyByLevel(this.level.LevelNumber).subscribe(
       (data: any) => {
-        
         this.enemy = data.enemy;
-        this.enemy.EnemyMaxHealth=this.enemy.EnemyHealth;
-    });
+        this.enemy.EnemyMaxHealth = this.enemy.EnemyHealth;
+        this.addLog('system', `${this.enemy.EnemyName} karşına çıktı.`);
+        this.activatePlayerTurnIfReady();
+      },
+      (error: any) => this.showModal('Düşman yüklenemedi', this.getErrorMessage(error), 'login')
+    );
   }
 
   heroAttack(): void {
-    //Math.floor() sayıyı yuvarlar.
-    //Math.random() 0 ile 1 arasında rastgele bir ondalık sayı üretir.
-    if (this.hero && this.enemy) {
-      const heroAttackPower = Math.floor(Math.random() * (this.hero.HeroAttackMax - this.hero.HeroAttackMin + 1)) + this.hero.HeroAttackMin;
-      this.enemy.EnemyHealth -= heroAttackPower;
-
-      if (this.enemy.EnemyHealth <= 0) {
-        this.enemy.EnemyHealth = 0;
-        if (this.enemy.EnemyLevel < 5) {
-          alert(`${this.enemy.EnemyName} Yenildi. Sonraki Seviyeye Geç.`);
-        }
-        this.heroUpdate();
-      }
-      else {
-        this.enemyActionLog=(`${this.enemy.EnemyName} Adlı Düşmana ${heroAttackPower} Hasar Verdin. <br> Kalan Düşman Sağlığı: ${this.enemy.EnemyHealth}`);
-        // Düşman saldırısı
-        this.enemyAttack();
-      }
+    if (!this.canAct()) {
+      return;
     }
-  }
-  enemyAttack(): void {
-    if (this.hero && this.enemy) {
-      const enemyAttackPower = Math.floor(Math.random() * (this.enemy.EnemyAttackMax - this.enemy.EnemyAttackMin + 1)) + this.enemy.EnemyAttackMin;
-    
-      if(this.defending){
-        this.heroDefence(enemyAttackPower);
-        if (this.hero.HeroHealth <= 0) {
-            this.hero.HeroHealth = 0;
-            alert(`Oyunu KAYBETTİN.
-    Giriş Sayfasına Yönlendiriliyorsun...`);
-            this.router.navigate(['/login']);
-          } 
-          else {
-            this.heroActionLog=(`${this.heroActionLog1}, ${enemyAttackPower} Hasar Aldın.<br>Kalan Sağlık: ${this.hero.HeroHealth}`);  
-        this.defending = false;
-      }
+
+    const heroAttackPower = this.randomBetween(this.hero.HeroAttackMin, this.hero.HeroAttackMax);
+    this.enemy.EnemyHealth = Math.max(this.enemy.EnemyHealth - heroAttackPower, 0);
+    this.addLog('hero', `${this.enemy.EnemyName} adlı düşmana ${heroAttackPower} hasar verdin.`);
+
+    if (this.enemy.EnemyHealth <= 0) {
+      this.handleEnemyDefeated();
+      return;
     }
-    else{
-        this.hero.HeroHealth -= enemyAttackPower;
-        if (this.hero.HeroHealth <= 0) {
-            this.hero.HeroHealth = 0;
-            alert(`Oyunu KAYBETTİN.
-    Giriş Sayfasına Yönlendiriliyorsun...`);
-            this.router.navigate(['/login']);
-          } 
-          else {
-            this.heroActionLog=(`${enemyAttackPower} Hasar Aldın.<br>Kalan Sağlık: ${this.hero.HeroHealth}`);  
-        this.defending = false;
-      }
-    }
-  }
-}
 
-  heroDefence(enemyAttackPower: number): void {
-    if (this.hero) {
-      
-      // Kahramanın savunma gücünü hesapla
-      const defencePower = Math.floor(Math.random() * (this.hero.HeroDefenceMax - this.hero.HeroDefenceMin + 1)) + this.hero.HeroDefenceMin;
-
-      // Düşmanın saldırısından savunma gücünü çıkararak etkili hasarı hesapla
-      const effectiveDamage = Math.max(enemyAttackPower - defencePower, 0);
-
-      // Kahramanın sağlığını güncelle
-      this.hero.HeroHealth -= effectiveDamage;
-
-      this.heroActionLog1=(`${defencePower} Değerinde Hasar Engelledin`);
-    }
+    this.queueEnemyTurn();
   }
 
   defend(): void {
-    this.defending = true;
-    this.enemyAttack();
+    if (!this.canAct()) {
+      return;
+    }
+
+    this.addLog('hero', 'Savunmaya geçtin. Potun yeniden hazırlandı.');
+    this.isHealButtonDisabled = false;
+    this.queueEnemyTurn(true);
   }
 
   heroHeal(): void {
-    if (this.isHealButtonDisabled) {
-      this.heroActionLog=('Tekrar Can Basamazsın.');
+    if (!this.canAct()) {
       return;
     }
-    if (this.hero) {
-      
-      if (this.hero.HeroHealth >= this.hero.MaxHealth) {
-        this.hero.HeroHealth = this.hero.MaxHealth;
-        this.heroActionLog=(`Sağlığın Tamamen Dolu`);
-      }
-      else{
-        const healingPower = Math.floor(Math.random() * (this.hero.HeroPotMax - this.hero.HeroPotMin + 1)) + this.hero.HeroPotMin;
-        this.hero.HeroHealth += healingPower;
-        this.heroActionLog=(`Sağlık Potu Kullandın.<br>${healingPower} Can İyileştin`);
 
-        this.isHealButtonDisabled = true;
-      }
+    if (this.isHealButtonDisabled) {
+      this.addLog('system', 'Pot tekrar kullanılamaz. Savunma yaparak potunu hazırlayabilirsin.');
+      return;
+    }
+
+    if (this.hero.HeroHealth >= this.hero.MaxHealth) {
+      this.hero.HeroHealth = this.hero.MaxHealth;
+      this.addLog('system', 'Sağlığın tamamen dolu.');
+      return;
+    }
+
+    const healingPower = this.randomBetween(this.hero.HeroPotMin, this.hero.HeroPotMax);
+    this.hero.HeroHealth = Math.min(this.hero.HeroHealth + healingPower, this.hero.MaxHealth);
+    this.isHealButtonDisabled = true;
+    this.addLog('hero', `Sağlık potu kullandın ve ${healingPower} can iyileştin.`);
+  }
+
+  closeModal(): void {
+    const action = this.modalAction;
+
+    this.modalTitle = '';
+    this.modalMessage = '';
+    this.modalAction = 'none';
+
+    if (action === 'nextLevel') {
+      this.advanceLevel();
+      return;
+    }
+
+    if (action === 'login') {
+      this.router.navigate(['/login']);
     }
   }
 
-  heroUpdate(): void {
-    if (this.hero && this.level) {
-      this.enemyActionLog = '';
-      this.heroActionLog = '';
-      if (this.level.LevelNumber < 5) {
-        
-        this.level.LevelNumber++;
-        this.heroService.UpdateHeroStats(this.hero.HeroId, this.level.LevelNumber).subscribe(
-          (data: any) => {
+  isActionDisabled(): boolean {
+    return this.turnPhase !== 'player' || !this.hero || !this.enemy;
+  }
 
-            this.hero = data.hero;
-            this.initializeHero()
-            this.initializeEnemy();
-          });
-      }
-      else {
-        alert(`Oyun Bitti. Tüm Düşmanları Yok Ettin.
-Giriş Sayfasına Yönlendiriliyorsun...`);
-        this.router.navigate(['/login']);
+  private queueEnemyTurn(isDefending: boolean = false): void {
+    this.turnPhase = 'enemy';
+    this.statusMessage = 'Düşman saldırıya hazırlanıyor...';
+
+    setTimeout(() => {
+      this.enemyAttack(isDefending);
+    }, 900);
+  }
+
+  private enemyAttack(isDefending: boolean): void {
+    if (!this.hero || !this.enemy || this.turnPhase !== 'enemy') {
+      return;
+    }
+
+    const enemyAttackPower = this.randomBetween(this.enemy.EnemyAttackMin, this.enemy.EnemyAttackMax);
+    let effectiveDamage = enemyAttackPower;
+
+    if (isDefending) {
+      const defencePower = this.randomBetween(this.hero.HeroDefenceMin, this.hero.HeroDefenceMax);
+      const guardedDamage = Math.floor(enemyAttackPower * 0.5);
+      effectiveDamage = Math.max(guardedDamage - defencePower, 0);
+
+      this.addLog('hero', `${defencePower} savunma puanı ve gard ile hasarı azalttın.`);
+
+      if (effectiveDamage === 0) {
+        const counterDamage = Math.max(Math.floor(defencePower / 2), 1);
+        this.enemy.EnemyHealth = Math.max(this.enemy.EnemyHealth - counterDamage, 0);
+        this.addLog('hero', `Tam blok yaptın ve ${counterDamage} karşı hasar verdin.`);
+
+        if (this.enemy.EnemyHealth <= 0) {
+          this.handleEnemyDefeated();
+          return;
+        }
       }
     }
+
+    this.hero.HeroHealth = Math.max(this.hero.HeroHealth - effectiveDamage, 0);
+    this.addLog('enemy', `${this.enemy.EnemyName} ${effectiveDamage} hasar verdi.`);
+
+    if (this.hero.HeroHealth <= 0) {
+      this.turnPhase = 'finished';
+      this.showModal('Oyunu kaybettin', 'Giriş sayfasına yönlendiriliyorsun...', 'login');
+      return;
+    }
+
+    this.turnPhase = 'player';
+    this.statusMessage = 'Sıra sende.';
+  }
+
+  private handleEnemyDefeated(): void {
+    this.turnPhase = 'modal';
+
+    if (this.level.LevelNumber < 5) {
+      this.showModal(`${this.enemy.EnemyName} yenildi`, 'Sonraki seviyeye geçiyorsun.', 'nextLevel');
+      return;
+    }
+
+    this.showModal('Oyun bitti', 'Tüm düşmanları yok ettin. Giriş sayfasına yönlendiriliyorsun...', 'login');
+  }
+
+  private advanceLevel(): void {
+    if (!this.hero || !this.level) {
+      return;
+    }
+
+    this.turnPhase = 'loading';
+    this.statusMessage = 'Yeni seviye hazırlanıyor...';
+    this.battleLogs = [];
+    this.level.LevelNumber++;
+
+    this.heroService.UpdateHeroStats(this.hero.HeroId, this.level.LevelNumber).subscribe(
+      (data: any) => {
+        this.hero = data.hero;
+        this.hero.MaxHealth = this.hero.HeroHealth;
+        this.resetHealButton();
+        this.initializeEnemy();
+      },
+      (error: any) => this.showModal('Seviye güncellenemedi', this.getErrorMessage(error), 'login')
+    );
+  }
+
+  private activatePlayerTurnIfReady(): void {
+    if (this.hero && this.enemy && this.turnPhase === 'loading') {
+      this.turnPhase = 'player';
+      this.statusMessage = 'Sıra sende.';
+    }
+  }
+
+  private resetHealButton(): void {
+    this.isHealButtonDisabled = false;
+  }
+
+  private canAct(): boolean {
+    return this.turnPhase === 'player' && !!this.hero && !!this.enemy;
+  }
+
+  private showModal(title: string, message: string, action: 'none' | 'nextLevel' | 'login' = 'none'): void {
+    this.modalTitle = title;
+    this.modalMessage = message;
+    this.modalAction = action;
+    this.turnPhase = action === 'none' ? this.turnPhase : 'modal';
+  }
+
+  private addLog(source: 'hero' | 'enemy' | 'system', text: string): void {
+    this.battleLogs = [{ source: source, text: text }].concat(this.battleLogs).slice(0, 6);
+  }
+
+  private randomBetween(min: number, max: number): number {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  private getErrorMessage(error: any): string {
+    if (error && error.error && error.error.Message) {
+      return error.error.Message;
+    }
+
+    if (error && error.message) {
+      return error.message;
+    }
+
+    return 'Bilinmeyen hata';
   }
 }

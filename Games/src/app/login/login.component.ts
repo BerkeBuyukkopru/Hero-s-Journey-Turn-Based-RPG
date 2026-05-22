@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { HeroService } from '../services/hero.service';
-import { heromodel } from '../models/heromodel';
 
 @Component({
   selector: 'app-login',
@@ -9,35 +8,58 @@ import { heromodel } from '../models/heromodel';
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent {
-  
   heroName: string = '';
-  templateId: number = 1; // Varsayılan bir templateId
+  templateId: number = 1;
+  noticeTitle = '';
+  noticeMessage = '';
 
   constructor(private heroService: HeroService, private router: Router) {}
 
-  onLogin() {
-    if (this.heroName && this.heroName.trim().length > 0) {
-      // HeroService ile yeni bir kahraman oluştur
-      this.heroService.InitializeHeroFromTemplate(this.templateId, this.heroName)
-        .subscribe(
-          (returnModel : any ) => {
-            
-            const heroId = returnModel.hero.HeroId; // Yeni oluşturulan kahramanın ID'sini alıyoruz
-            const heroName = returnModel.hero.HeroName; // Kahramanın adını alıyoruz
-            
-            // game component'ine yönlendir ve heroId ve heroName'i query params olarak ekle
-            this.router.navigate(['/game'], { queryParams: { heroId: heroId, heroName: heroName } });
-          },
-          (error: any) => {
-            // Hata durumunda kullanıcıya mesaj göster
-            console.error('HATA', error);
-            alert('Bir hata oluştu: ' + (error.message || 'Bilinmeyen hata'));
-          }
-        );
-    } else {
-      // Eğer heroName boşsa kullanıcıya mesaj göster
-      alert('Lütfen Bir İsim Giriniz!');
+  onLogin(): void {
+    const trimmedHeroName = this.heroName.trim();
+
+    if (!trimmedHeroName) {
+      this.showNotice('İsim gerekli', 'Lütfen bir kahraman adı giriniz.');
+      return;
     }
-    
+
+    if (trimmedHeroName.length > 20) {
+      this.showNotice('İsim çok uzun', 'Kahraman adı en fazla 20 karakter olabilir.');
+      return;
+    }
+
+    this.heroService.InitializeHeroFromTemplate(this.templateId, trimmedHeroName)
+      .subscribe(
+        (returnModel: any) => {
+          const heroId = returnModel.hero.HeroId;
+
+          this.router.navigate(['/game'], { queryParams: { heroId: heroId } });
+        },
+        (error: any) => {
+          this.showNotice('Bir hata oluştu', this.getErrorMessage(error));
+        }
+      );
+  }
+
+  showNotice(title: string, message: string): void {
+    this.noticeTitle = title;
+    this.noticeMessage = message;
+  }
+
+  closeNotice(): void {
+    this.noticeTitle = '';
+    this.noticeMessage = '';
+  }
+
+  private getErrorMessage(error: any): string {
+    if (error && error.error && error.error.Message) {
+      return error.error.Message;
+    }
+
+    if (error && error.message) {
+      return error.message;
+    }
+
+    return 'Bilinmeyen hata';
   }
 }

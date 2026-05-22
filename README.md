@@ -1,6 +1,39 @@
 # Hero's Journey
 **Hero's Journey** is a simple turn-based strategy game developed using **Angular 7** and **ASP.NET MVC**.
 
+## Local Setup
+
+### Database
+Run the database script on your local SQL Server Express instance:
+
+```powershell
+sqlcmd -S .\SQLEXPRESS -E -i GameDatabase.sql
+```
+
+The script creates `GameDatabase`, creates the required `Tbl_*` tables if they do not exist, and inserts the seed data required to start the game.
+
+### Backend
+Open `Game/Game.sln` in Visual Studio and run the `GameWebAPI` project. The frontend expects the API at:
+
+```text
+http://localhost:5000
+```
+
+### Frontend
+Install dependencies and start Angular:
+
+```powershell
+cd Games
+npm install
+npm start
+```
+
+Then open:
+
+```text
+http://localhost:4200
+```
+
 ## Features
 - Start the game by entering a character name.
 - Battle randomly generated enemies.

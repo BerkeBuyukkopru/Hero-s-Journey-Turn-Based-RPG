@@ -1,10 +1,18 @@
 <div class="login-container">
-  <form (ngSubmit)="onLogin()" #loginForm="ngForm"> <!-- onLogin() metodu çağrılıyor -->
+  <form (ngSubmit)="onLogin()" #loginForm="ngForm">
     <div class="form-group">
       <h2>Hero's Journey</h2>
       <label class="col-form-label mt-2" for="username">Kahramanın Adını Giriniz: </label>
-      <input type="text" class="form-control" placeholder="Hero" id="username" name="username" [(ngModel)]="heroName" required>
+      <input type="text" class="form-control" placeholder="Hero" id="username" name="username" [(ngModel)]="heroName" maxlength="20" required>
       <button type="submit" class="btn btn-info mt-2">Oyuna Başla</button>
     </div>
   </form>
+
+  <div class="modal-backdrop-custom" *ngIf="noticeMessage">
+    <div class="message-modal">
+      <h3>{{ noticeTitle }}</h3>
+      <p>{{ noticeMessage }}</p>
+      <button type="button" class="btn btn-info" (click)="closeNotice()">Tamam</button>
+    </div>
+  </div>
 </div>

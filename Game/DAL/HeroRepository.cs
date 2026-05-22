@@ -11,7 +11,7 @@ namespace DAL
 {
     public class HeroRepository
     {
-        string connectionString = "Data Source=DESKTOP-518NUBI\\SQLEXPRESS;Initial Catalog=GameDatabase;Integrated Security=True"; //veri tabanı adresimiz.
+        string connectionString = Database.ConnectionString; //veri tabanı adresimiz.
 
         public Hero GetHero(int heroId) //heroId parametresine göre veri al ve hero nesnesi olarak döndür.
         {

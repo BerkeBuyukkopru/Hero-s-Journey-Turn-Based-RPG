@@ -26,8 +26,7 @@ namespace DAL.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.ConnectionString)]
-        [global::System.Configuration.DefaultSettingValueAttribute("Data Source=DESKTOP-518NUBI\\SQLEXPRESS;Initial Catalog=GameDatabase;Integrated Se" +
-            "curity=True")]
+        [global::System.Configuration.DefaultSettingValueAttribute("Data Source=.\\SQLEXPRESS;Initial Catalog=GameDatabase;Integrated Security=True")]
         public string GameDatabaseConnectionString {
             get {
                 return ((string)(this["GameDatabaseConnectionString"]));

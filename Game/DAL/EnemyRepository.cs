@@ -11,7 +11,7 @@ namespace DAL
 {
     public class EnemyRepository
     {
-        string connectionString = "Data Source=DESKTOP-518NUBI\\SQLEXPRESS;Initial Catalog=GameDatabase;Integrated Security=True"; //SQL Bağlantı Adresimiz.
+        string connectionString = Database.ConnectionString; //SQL Bağlantı Adresimiz.
         public List<Enemy> GetEnemiesByLevel(int level) //List<Enemy> veri türünü döndür. Parametre olarak level kullan.
         {
             List<Enemy> enemies = new List<Enemy>(); //enemy listesi oluştur

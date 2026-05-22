@@ -25,6 +25,10 @@ namespace BLL
         {
    
             var template = _heroTemplateRepository.GetHeroTemplate(templateId);
+            if (template == null)
+            {
+                return null;
+            }
 
             var hero = new Hero
             {
@@ -50,6 +54,10 @@ namespace BLL
         {
             Hero hero = _heroRepository.GetHero(heroId);
             Level level = _levelRepository.GetLevel(heroLevel);
+            if (hero == null || level == null)
+            {
+                return null;
+            }
 
             hero.HeroAttackMin = (int)(hero.HeroAttackMin * level.HeroStatMultiplier);
             hero.HeroAttackMax = (int)(hero.HeroAttackMax * level.HeroStatMultiplier);

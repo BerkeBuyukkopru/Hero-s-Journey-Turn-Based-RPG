@@ -11,7 +11,7 @@ namespace DAL
 {
     public class LevelRepository
     {
-        string connectionString = "Data Source=DESKTOP-518NUBI\\SQLEXPRESS;Initial Catalog=GameDatabase;Integrated Security=True"; //veri tabanı adresimiz.
+        string connectionString = Database.ConnectionString; //veri tabanı adresimiz.
             public Level GetLevel(int levelId) //levelId parametresine göre Level veri tabanından çek.
             {
                 using (SqlConnection baglanti = new SqlConnection(connectionString))

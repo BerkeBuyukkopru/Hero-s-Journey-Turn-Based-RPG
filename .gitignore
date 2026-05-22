@@ -1,0 +1,25 @@
+# Visual Studio
+.vs/
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# ASP.NET / NuGet
+packages/
+*.nupkg
+
+# Angular / Node
+node_modules/
+dist/
+tmp/
+out-tsc/
+coverage/
+npm-debug.log
+yarn-error.log
+
+# OS
+.DS_Store
+Thumbs.db

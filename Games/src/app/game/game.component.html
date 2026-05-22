@@ -1,41 +1,54 @@
 <div class="game-container">
-
-  <div class="character-information">
-    <div class="hero-section">
-      <h2>{{ hero?.HeroName }}</h2>
-      <p>Sağlık: {{ hero?.HeroHealth }}</p>
-      <div class="progress">
-        <div class="progress-bar bg-success" role="progressbar" [style.width]="(hero?.HeroHealth / hero?.MaxHealth) * 100 + '%'" [attr.aria-valuenow]="hero?.HeroHealth"  aria-valuemin="0" aria-valuemax="hero?.MaxHealth"></div>
-      </div>
-      <div class="action-buttons">
-        <button type="button" class="btn btn-danger" (click)="heroAttack()">Saldır</button>
-        <button type="button" class="btn btn-warning" (click)="defend()">Defans</button>
-        <button type="button" class="btn btn-success" (click)="heroHeal()" [disabled]="isHealButtonDisabled">Pot</button>
-      </div>
-      <div class="logText" [innerHTML] = "heroActionLog">
-      </div>
-    </div>
-  
-    <div class="enemy-section">
-      <h2>{{ enemy?.EnemyName }}</h2>
-      <p>Sağlık: {{ enemy?.EnemyHealth }}</p>
-      <div class="progress">
-        <div class="progress-bar bg-success" role="progressbar"  [style.width]="(enemy?.EnemyHealth / enemy?.EnemyMaxHealth) * 100 + '%'" [attr.aria-valuenow]="enemy?.EnemyHealth" aria-valuemin="0" aria-valuemax="enemy?.EnemyMaxHealth"></div>
-      </div>
-      <div>
-        <div class="logText marginTop" [innerHTML] = "enemyActionLog">
-        </div>
-      </div>
-    </div>
+  <div class="status-strip">
+    <span>Seviye {{ level?.LevelNumber }}</span>
+    <strong>{{ statusMessage }}</strong>
   </div>
-  
-  <div class="character-avatars">
-    <div class="img-container">
-      <img [src] = "hero?.HeroImagePath" class="char-img">
-    </div>
 
-    <div class="img-container">
-      <img [src] = "enemy?.EnemyImagePath" class="char-img">
+  <div class="battle-layout">
+    <section class="character-card hero-section">
+      <div class="character-header">
+        <h2>{{ hero?.HeroName }}</h2>
+        <p>Sağlık: {{ hero?.HeroHealth }} / {{ hero?.MaxHealth }}</p>
+      </div>
+      <div class="progress">
+        <div class="progress-bar bg-success" role="progressbar" [style.width]="(hero?.HeroHealth / hero?.MaxHealth) * 100 + '%'" [attr.aria-valuenow]="hero?.HeroHealth" aria-valuemin="0" [attr.aria-valuemax]="hero?.MaxHealth"></div>
+      </div>
+      <div class="img-container">
+        <img *ngIf="hero?.HeroImagePath" [src]="hero.HeroImagePath" class="char-img" alt="Kahraman">
+      </div>
+    </section>
+
+    <section class="character-card enemy-section">
+      <div class="character-header">
+        <h2>{{ enemy?.EnemyName }}</h2>
+        <p>Sağlık: {{ enemy?.EnemyHealth }} / {{ enemy?.EnemyMaxHealth }}</p>
+      </div>
+      <div class="progress">
+        <div class="progress-bar bg-success" role="progressbar" [style.width]="(enemy?.EnemyHealth / enemy?.EnemyMaxHealth) * 100 + '%'" [attr.aria-valuenow]="enemy?.EnemyHealth" aria-valuemin="0" [attr.aria-valuemax]="enemy?.EnemyMaxHealth"></div>
+      </div>
+      <div class="img-container">
+        <img *ngIf="enemy?.EnemyImagePath" [src]="enemy.EnemyImagePath" class="char-img" alt="Düşman">
+      </div>
+    </section>
+  </div>
+
+  <div class="action-buttons">
+    <button type="button" class="btn btn-danger" (click)="heroAttack()" [disabled]="isActionDisabled()">Saldır</button>
+    <button type="button" class="btn btn-warning" (click)="defend()" [disabled]="isActionDisabled()">Defans</button>
+    <button type="button" class="btn btn-success" (click)="heroHeal()" [disabled]="isActionDisabled() || isHealButtonDisabled">Pot</button>
+  </div>
+
+  <section class="battle-log" *ngIf="battleLogs.length">
+    <div class="log-row" *ngFor="let log of battleLogs" [ngClass]="log.source">
+      {{ log.text }}
+    </div>
+  </section>
+
+  <div class="modal-backdrop-custom" *ngIf="modalMessage">
+    <div class="message-modal">
+      <h3>{{ modalTitle }}</h3>
+      <p>{{ modalMessage }}</p>
+      <button type="button" class="btn btn-info" (click)="closeModal()">Devam</button>
     </div>
   </div>
 </div>
