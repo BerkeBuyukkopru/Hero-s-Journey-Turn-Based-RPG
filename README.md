@@ -12,9 +12,11 @@ This repository is a cleaned-up and modernized version of an internship project.
 - [Project Structure](#project-structure)
 - [Architecture Overview](#architecture-overview)
 - [Prerequisites](#prerequisites)
+- [Installation](#installation)
 - [Database Setup](#database-setup)
 - [Backend Setup](#backend-setup)
 - [Frontend Setup](#frontend-setup)
+- [Usage](#usage)
 - [API Endpoints](#api-endpoints)
 - [Gameplay Flow](#gameplay-flow)
 - [Known Limitations](#known-limitations)
@@ -159,6 +161,47 @@ To run the project locally, the following tools are required:
 - Node.js and npm
 - Angular CLI, installed globally or used through the local project dependencies
 
+## Installation
+
+Clone the repository and move into the project folder:
+
+```powershell
+git clone https://github.com/BerkeBuyukkopru/Hero-s-Journey-Turn-Based-RPG.git
+cd Hero-s-Journey-Turn-Based-RPG
+```
+
+Create and seed the local SQL Server database:
+
+```powershell
+sqlcmd -S .\SQLEXPRESS -E -i GameDatabase.sql
+```
+
+Open the backend solution in Visual Studio:
+
+```text
+Game/Game.sln
+```
+
+Restore NuGet packages if needed, set `GameWebAPI` as the startup project, and run the backend. The API should be available at:
+
+```text
+http://localhost:5000
+```
+
+Install frontend dependencies and start the Angular application:
+
+```powershell
+cd Games
+npm install
+npm start
+```
+
+Open the application in the browser:
+
+```text
+http://localhost:4200
+```
+
 ## Database Setup
 
 The project includes a database setup script:
@@ -253,6 +296,19 @@ Invoke-RestMethod "http://localhost:5000/api/enemy/GetRandomEnemyByLevel?level=1
    ```
 
 The project uses Angular 7. The `start` and `build` scripts include `NODE_OPTIONS=--openssl-legacy-provider` so the project can run more reliably on newer Node.js versions.
+
+## Usage
+
+After the backend and frontend are running:
+
+1. Open `http://localhost:4200`.
+2. Enter a hero name on the login screen.
+3. Click **Oyuna Başla** to create the hero and start the game.
+4. Use the battle actions during your turn:
+   - **Saldır:** attacks the current enemy.
+   - **Defans:** reduces the next incoming enemy damage and may prepare another potion.
+   - **Pot:** restores hero health when a potion is available.
+5. Follow the battle log to see player actions, enemy actions, level progression, win messages, and defeat messages.
 
 ## API Endpoints
 
