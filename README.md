@@ -155,8 +155,9 @@ Data Source=.\SQLEXPRESS;Initial Catalog=GameDatabase;Integrated Security=True
 To run the project locally, the following tools are required:
 
 - Windows development environment
-- Visual Studio with .NET Framework project support
-- SQL Server or SQL Server Express
+- Visual Studio with ASP.NET and .NET Framework project support
+- .NET Framework 4.7.2 targeting/developer pack
+- SQL Server or SQL Server Express, preferably with a local `SQLEXPRESS` instance
 - `sqlcmd` command-line tool
 - Node.js and npm
 - Angular CLI, installed globally or used through the local project dependencies
@@ -182,11 +183,13 @@ Open the backend solution in Visual Studio:
 Game/Game.sln
 ```
 
-Restore NuGet packages if needed, set `GameWebAPI` as the startup project, and run the backend. The API should be available at:
+Restore NuGet packages if needed, set `GameWebAPI` as the startup project, and run the backend with Visual Studio/IIS Express. The API should be available at:
 
 ```text
 http://localhost:5000
 ```
+
+> This backend is a .NET Framework ASP.NET Web API project. It is intended to be run from Visual Studio, not with `dotnet run`.
 
 Install frontend dependencies and start the Angular application:
 
@@ -235,6 +238,8 @@ Expected result:
 Changed database context to 'GameDatabase'.
 ```
 
+If your SQL Server instance name is different, update both the `sqlcmd` server value and the connection string in `Game/GameWebAPI/Web.config`.
+
 ## Backend Setup
 
 1. Open the backend solution in Visual Studio:
@@ -256,6 +261,8 @@ Changed database context to 'GameDatabase'.
    ```
 
 5. Run the backend project.
+
+> This project is a classic .NET Framework Web API application. Use Visual Studio/IIS Express for local development instead of `dotnet run`.
 
 The frontend expects the backend API to be available at:
 
@@ -296,6 +303,8 @@ Invoke-RestMethod "http://localhost:5000/api/enemy/GetRandomEnemyByLevel?level=1
    ```
 
 The project uses Angular 7. The `start` and `build` scripts include `NODE_OPTIONS=--openssl-legacy-provider` so the project can run more reliably on newer Node.js versions.
+
+Because this is a legacy Angular 7 project, `npm install` may show deprecation or vulnerability warnings from older dependencies. These warnings do not necessarily prevent the local development server from running.
 
 ## Usage
 
