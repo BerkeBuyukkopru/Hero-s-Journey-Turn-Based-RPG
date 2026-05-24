@@ -1,6 +1,6 @@
-# Hero's Journey
+# Hero's Journey: Turn-Based RPG
 
-**Hero's Journey** is a simple turn-based browser game built with **Angular 7**, **ASP.NET Web API**, and **SQL Server**. The player creates a hero, fights randomly selected enemies, progresses through levels, and tries to survive until all levels are cleared.
+**Hero's Journey: Turn-Based RPG** is a simple turn-based browser game built with **Angular 7**, **ASP.NET Web API**, and **SQL Server**. The player creates a hero, fights randomly selected enemies, progresses through levels, and tries to survive until all levels are cleared.
 
 This repository is a cleaned-up and modernized version of an internship project. The goal of the project is to demonstrate a complete local full-stack game flow with a separate frontend, backend, business layer, data access layer, and SQL Server database setup.
 
@@ -90,7 +90,7 @@ The battle log records player actions, enemy attacks, and system messages during
 ## Project Structure
 
 ```text
-Hero-s-Journey/
+Hero-s-Journey-Turn-Based-RPG/
 |-- GameDatabase.sql              # Local database creation and seed script
 |-- Game/                         # Backend solution
 |   |-- Game.sln
